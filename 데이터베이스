@@ -1,0 +1,425 @@
+[시퀀스]
+
+/* 회원 관리 테이블 */
+create sequence GGUL_USER_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 개인 지역 테이블 */
+create sequence GGUL_USER_LOCAL_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 개인 보관함 테이블 */
+create sequence GGUL_ALBUM_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 즐겨찾는 이웃 테이블 */
+create sequence GGUL_USER_NEIGHBOR_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 지역 정보 */
+create sequence GGUL_LOCAL_INFO_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 게시판 정보 테이블 */
+create sequence GGUL_BOARD_INFO_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 게시판 첨부 이미지 테이블 */
+create sequence GGUL_BOARD_IMAGE_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 댓글 테이블 */
+create sequence GGUL_BOARD_SEQ
+start with 0
+minvalue 0
+increment by 1;
+
+/* 신고 테이블 */
+create sequence GGUL_REPORT_IDX
+start with 0
+minvalue 0
+increment by 1;
+
+/* 게시판 테이블 */
+create sequence GGUL_BOARD_IDX
+start with 0
+minvalue 0
+increment by 1;
+
+/* 해시태그 테이블 */
+create sequence GGUL_BOARD_HASHTAG_PRE
+start with 0
+minvalue 0
+increment by 1;
+
+
+/* 회원 관리 테이블 */
+CREATE TABLE USER_INFO (
+	user_seq NUMBER NOT NULL, /* 유저 시퀀스 */
+	user_id VARCHAR2(100) NOT NULL, /* 회원아이디(이메일) */
+	user_pw VARCHAR2(100) NOT NULL, /* 비밀번호 */
+	user_name VARCHAR2(24) NOT NULL, /* 회원이름 */
+	user_nick VARCHAR2(20) NOT NULL, /* 별명 */
+	user_msg VARCHAR2(200), /* 상태메세지 */
+	user_addr VARCHAR2(100) NOT NULL, /* 주소(모달로하기 예:신림동) */
+	user_bday VARCHAR2(20) NOT NULL, /* 생년월일(예:19900906) */
+	user_gender NUMBER NOT NULL, /* 성별 */
+	user_img VARCHAR2(100), /* 프로필사진 제목 */
+	join_date VARCHAR2(20) NOT NULL, /* 가입날짜 */
+	rest_date VARCHAR2(20), /* 휴면날짜 */
+	drop_date VARCHAR2(20), /* 탈퇴날짜 */
+	user_grade NUMBER NOT NULL, /* 개인등급 */
+	user_point NUMBER NOT NULL, /* 개인포인트 */
+	user_auth NUMBER NOT NULL, /* 권한(0:관리자 1:회원) */
+	user_status NUMBER NOT NULL /* 상태(0:활성화 1:휴면 2:탈퇴) */
+);
+
+CREATE UNIQUE INDEX PK_USER_INFO
+	ON USER_INFO (
+		user_id ASC
+	);
+
+ALTER TABLE USER_INFO
+	ADD
+		CONSTRAINT PK_USER_INFO
+		PRIMARY KEY (
+			user_id
+		);
+
+/* 즐겨찾는 이웃 테이블 */
+CREATE TABLE USER_NEIGHBOR (
+	user_neighbor_seq NUMBER NOT NULL, /* 즐겨찾는 이웃 시퀀스 */
+	user_id VARCHAR2(100) NOT NULL, /* 나의 아이디 */
+	neigh_id VARCHAR2(100) NOT NULL /* 즐겨찾는 이웃 아이디 */
+);
+
+CREATE UNIQUE INDEX PK_USER_NEIGHBOR
+	ON USER_NEIGHBOR (
+		user_id ASC,
+		neigh_id ASC
+	);
+
+ALTER TABLE USER_NEIGHBOR
+	ADD
+		CONSTRAINT PK_USER_NEIGHBOR
+		PRIMARY KEY (
+			user_id,
+			neigh_id
+		);
+
+/* 개인 보관함 테이블 */
+CREATE TABLE USER_ALBUM (
+	album_idx NUMBER NOT NULL, /* 앨범 번호(시퀀스사용) */
+	user_id VARCHAR2(100) NOT NULL, /* 나의 아이디 */
+	album_name VARCHAR2(100) NOT NULL, /* 앨범이름 */
+	board_idx NUMBER, /* 게시글 번호 */
+	board_reg_date VARCHAR2(20) /* 보관 날짜 */
+);
+
+CREATE UNIQUE INDEX PK_USER_ALBUM
+	ON USER_ALBUM (
+		album_idx ASC
+	);
+
+ALTER TABLE USER_ALBUM
+	ADD
+		CONSTRAINT PK_USER_ALBUM
+		PRIMARY KEY (
+			album_idx
+		);
+
+/* 신고 테이블 */
+CREATE TABLE REPORT (
+	report_idx NUMBER NOT NULL, /* 번호(시퀀스) */
+	board_idx NUMBER NOT NULL, /* 게시글 번호 */
+	content_type NUMBER NOT NULL, /* 글 유형 */
+	report_category NUMBER NOT NULL, /* 신고분류 */
+	report_content VARCHAR2(500), /* 신고내용 */
+	report_user_id VARCHAR2(100) NOT NULL, /* 신고자 */
+	report_date VARCHAR2(20) NOT NULL /* 신고일 */
+);
+
+CREATE UNIQUE INDEX PK_REPORT
+	ON REPORT (
+		report_idx ASC
+	);
+
+ALTER TABLE REPORT
+	ADD
+		CONSTRAINT PK_REPORT
+		PRIMARY KEY (
+			report_idx
+		);
+
+/* 지역 정보 */
+CREATE TABLE LOCAL_INFO (
+	local_info_seq NUMBER NOT NULL, /* 지역 시퀀스 */
+	local_code VARCHAR2(50) NOT NULL, /* 지역 코드 */
+	local_name VARCHAR2(100) NOT NULL /* 지역 이름 */
+);
+
+CREATE UNIQUE INDEX PK_LOCAL_INFO
+	ON LOCAL_INFO (
+		local_code ASC
+	);
+
+ALTER TABLE LOCAL_INFO
+	ADD
+		CONSTRAINT PK_LOCAL_INFO
+		PRIMARY KEY (
+			local_code
+		);
+
+/* 게시판 정보 테이블 */
+CREATE TABLE BOARD_INFO (
+	board_info_seq NUMBER NOT NULL, /* 게시판 정보 시퀀스 */
+	local_code VARCHAR2(50) NOT NULL, /* 지역 코드 */
+	board_category NUMBER NOT NULL, /* 게시판 종류 번호 */
+	board_main VARCHAR2(100) NOT NULL, /* 상위 게시판 */
+	board_sub VARCHAR2(100) /* 하위 게시판 */
+);
+
+CREATE UNIQUE INDEX PK_BOARD_INFO
+	ON BOARD_INFO (
+		local_code ASC,
+		board_category ASC
+	);
+
+ALTER TABLE BOARD_INFO
+	ADD
+		CONSTRAINT PK_BOARD_INFO
+		PRIMARY KEY (
+			local_code,
+			board_category
+		);
+
+/* 게시판 테이블 */
+CREATE TABLE BOARD (
+	board_idx NUMBER NOT NULL, /* 게시글 번호(시퀀스사용) */
+	local_code VARCHAR2(50) NOT NULL, /* 지역 코드 */
+	board_category NUMBER NOT NULL, /* 게시판 종류 번호 */
+	board_subject VARCHAR2(100) NOT NULL, /* 게시글 제목 */
+	board_content VARCHAR2(500) NOT NULL, /* 게시글 내용 */
+	board_like NUMBER, /* 게시글 좋아요 */
+	board_img_main VARCHAR2(100), /* 대표이미지 제목 */
+	board_input_date VARCHAR2(20) NOT NULL, /* 게시글 입력 날짜 */
+	board_del_date VARCHAR2(20) NOT NULL, /* 게시글 삭제 날짜 */
+	board_status NUMBER NOT NULL /* 상태 */
+);
+
+CREATE UNIQUE INDEX PK_BOARD
+	ON BOARD (
+		board_idx ASC
+	);
+
+ALTER TABLE BOARD
+	ADD
+		CONSTRAINT PK_BOARD
+		PRIMARY KEY (
+			board_idx
+		);
+
+/* 해시태그 테이블 */
+CREATE TABLE BOARD_HASHTAG (
+	board_hashtag_pre NUMBER NOT NULL, /* 해쉬태그 시퀀스 */
+	board_idx NUMBER NOT NULL, /* 게시글 번호 */
+	hash_idx NUMBER NOT NULL, /* 해시태그 번호 */
+	board_hash VARCHAR2(100) NOT NULL /* 해시태그 */
+);
+
+CREATE UNIQUE INDEX PK_BOARD_HASHTAG
+	ON BOARD_HASHTAG (
+		board_idx ASC,
+		hash_idx ASC
+	);
+
+ALTER TABLE BOARD_HASHTAG
+	ADD
+		CONSTRAINT PK_BOARD_HASHTAG
+		PRIMARY KEY (
+			board_idx,
+			hash_idx
+		);
+
+/* 게시판 첨부 이미지 테이블 */
+CREATE TABLE BOARD_IMAGE (
+	board_image_seq NUMBER NOT NULL, /* 게시판 첨부 이미지 시퀀스 */
+	board_idx NUMBER NOT NULL, /* 게시글 번호 */
+	img_name VARCHAR2(100) NOT NULL /* 이미지 제목 */
+);
+
+CREATE UNIQUE INDEX PK_BOARD_IMAGE
+	ON BOARD_IMAGE (
+		board_idx ASC,
+		img_name ASC
+	);
+
+ALTER TABLE BOARD_IMAGE
+	ADD
+		CONSTRAINT PK_BOARD_IMAGE
+		PRIMARY KEY (
+			board_idx,
+			img_name
+		);
+
+/* 댓글 테이블 */
+CREATE TABLE BOARD_COMMENT (
+	board_idx NUMBER NOT NULL, /* 게시글 번호(시퀀스사용) */
+	comment_idx NUMBER NOT NULL, /* 댓글 번호 */
+	board_comment VARCHAR2(500) NOT NULL, /* 댓글 */
+	comment_like NUMBER, /* 댓글 좋아요 */
+	comment_user_id VARCHAR2(100) NOT NULL, /* 작성자 아이디 */
+	comment_date VARCHAR2(20) NOT NULL /* 댓글 입력 날짜 */
+);
+
+CREATE UNIQUE INDEX PK_BOARD_COMMENT
+	ON BOARD_COMMENT (
+		board_idx ASC,
+		comment_idx ASC
+	);
+
+ALTER TABLE BOARD_COMMENT
+	ADD
+		CONSTRAINT PK_BOARD_COMMENT
+		PRIMARY KEY (
+			board_idx,
+			comment_idx
+		);
+
+/* 개인 지역 테이블 */
+CREATE TABLE USER_LOCAL (
+	user_local_seq NUMBER NOT NULL, /* 유저 지역 시퀀스 */
+	user_id VARCHAR2(100) NOT NULL, /* 회원아이디 */
+	local_idx NUMBER NOT NULL, /* 개인지역순서 */
+	local_code VARCHAR2(50) NOT NULL /* 지역 코드 */
+);
+
+CREATE UNIQUE INDEX PK_USER_LOCAL
+	ON USER_LOCAL (
+		user_id ASC,
+		local_idx ASC
+	);
+
+ALTER TABLE USER_LOCAL
+	ADD
+		CONSTRAINT PK_USER_LOCAL
+		PRIMARY KEY (
+			user_id,
+			local_idx
+		);
+
+ALTER TABLE USER_NEIGHBOR
+	ADD
+		CONSTRAINT FK_USER_INFO_TO_USER_NEIGHBOR
+		FOREIGN KEY (
+			user_id
+		)
+		REFERENCES USER_INFO (
+			user_id
+		);
+
+ALTER TABLE USER_ALBUM
+	ADD
+		CONSTRAINT FK_USER_INFO_TO_USER_ALBUM
+		FOREIGN KEY (
+			user_id
+		)
+		REFERENCES USER_INFO (
+			user_id
+		);
+
+ALTER TABLE REPORT
+	ADD
+		CONSTRAINT FK_BOARD_TO_REPORT
+		FOREIGN KEY (
+			board_idx
+		)
+		REFERENCES BOARD (
+			board_idx
+		);
+
+ALTER TABLE BOARD_INFO
+	ADD
+		CONSTRAINT FK_LOCAL_INFO_TO_BOARD_INFO
+		FOREIGN KEY (
+			local_code
+		)
+		REFERENCES LOCAL_INFO (
+			local_code
+		);
+
+ALTER TABLE BOARD
+	ADD
+		CONSTRAINT FK_BOARD_INFO_TO_BOARD
+		FOREIGN KEY (
+			local_code,
+			board_category
+		)
+		REFERENCES BOARD_INFO (
+			local_code,
+			board_category
+		);
+
+ALTER TABLE BOARD_HASHTAG
+	ADD
+		CONSTRAINT FK_BOARD_TO_BOARD_HASHTAG
+		FOREIGN KEY (
+			board_idx
+		)
+		REFERENCES BOARD (
+			board_idx
+		);
+
+ALTER TABLE BOARD_IMAGE
+	ADD
+		CONSTRAINT FK_BOARD_TO_BOARD_IMAGE
+		FOREIGN KEY (
+			board_idx
+		)
+		REFERENCES BOARD (
+			board_idx
+		);
+
+ALTER TABLE BOARD_COMMENT
+	ADD
+		CONSTRAINT FK_BOARD_TO_BOARD_COMMENT
+		FOREIGN KEY (
+			board_idx
+		)
+		REFERENCES BOARD (
+			board_idx
+		);
+
+ALTER TABLE USER_LOCAL
+	ADD
+		CONSTRAINT FK_USER_INFO_TO_USER_LOCAL
+		FOREIGN KEY (
+			user_id
+		)
+		REFERENCES USER_INFO (
+			user_id
+		);
+
+ALTER TABLE USER_LOCAL
+	ADD
+		CONSTRAINT FK_LOCAL_INFO_TO_USER_LOCAL
+		FOREIGN KEY (
+			local_code
+		)
+		REFERENCES LOCAL_INFO (
+			local_code
+		);
